@@ -1,5 +1,14 @@
 int fs=100;     // Sampling rate (Hz) Don't change!
 float Ts = (float)1000/fs;   //Sampling Period (ms)
+//ADC COnfiguration
+const byte adc_in = A2; // ADC input pin.(For example A2 for Arduino Uno, 27 for ESP32)
+const byte adc_bits = 10; // The resolution of your MCU's ADC
+const byte default_bits = 10; // Don't change!
+const float vref = 5; // Reference voltage of your MCU's ADC (V)
+const float default_vref = 5 ;// Default reference voltage of the Arduino Uno (V) Don't Change
+const float adc_scale = pow(2,default_bits-adc_bits)*vref/default_vref; // Scales the input signal
+const float eog_offset = 1.40; // DC offset of the Mam Sense Board EOG output. (V)
+const float sig_offset = round(pow(2,default_bits)*eog_offset/default_vref);
 
 unsigned long counter = 0;
 short data_buff[200];
@@ -38,7 +47,7 @@ float err_coef=2;              // If fast eye movements are detected as blink in
   void loop(){
              
       delay(Ts);    
-      data_buff[counter%200] = analogRead(A2)-290;
+      data_buff[counter%200] = round( analogRead(adc_in)*adc_scale-sig_offset);
     // Serial.println(data_buff[counter%200]);
       
 // This block of code checks if the peak threshold is reached and records the value and its index
